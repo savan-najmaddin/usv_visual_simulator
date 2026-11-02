@@ -1,0 +1,28 @@
+{
+  "name": "pathplanner",
+  "version": "1.0.0",
+  "dependencies": [
+    {
+      "name": "imgui",
+      "features": [
+        "glfw-binding",
+        "opengl3-binding",
+        "vulkan-binding"
+      ]
+    },
+    "vcpkg-cmake",
+    "vulkan",
+    "vulkan-headers",
+    {
+      "name": "vulkan-loader",
+      "features": [
+        "wayland",
+        "xcb",
+        "xlib"
+      ],
+      "platform": "linux"
+    },
+    "vulkan-memory-allocator",
+    "assimp"
+  ]
+}
