@@ -20,8 +20,8 @@ public:
         initializeFloor();
         m_scene->add(m_floor);
 
-        initializeOcean();
-        m_scene->add(m_ocean);
+        //initializeOcean();
+        //m_scene->add(m_ocean);
 
         RGBELoader rgbe;
         auto env = rgbe.load("/home/amadeus/Desktop/path_planner/assets/autumn_field_puresky_2k.hdr");
