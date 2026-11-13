@@ -11,4 +11,5 @@ target_link_libraries(${CMAKE_PROJECT_NAME}Lib PUBLIC
         Eigen3::Eigen
         imgui::imgui
         assimp::assimp
+        ${OpenCV_LIBS}
 )

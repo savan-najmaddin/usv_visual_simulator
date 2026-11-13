@@ -29,6 +29,7 @@ FetchContent_MakeAvailable(threepp)
 
 find_package(imgui CONFIG REQUIRED)
 find_package(assimp REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_subdirectory(src)
 

@@ -23,6 +23,8 @@
       "platform": "linux"
     },
     "vulkan-memory-allocator",
-    "assimp"
+    "assimp",
+    "opencv4"
+
   ]
 }
