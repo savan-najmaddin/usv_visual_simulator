@@ -12,21 +12,28 @@ constexpr uint32_t kOceanRes = kFftSize / 2; // mesh verts per side
 
 class SceneManager{
 public:
-    SceneManager(Canvas& canvas, VulkanRenderer& renderer) : m_canvas(canvas),  m_renderer(renderer) {
+    SceneManager(Canvas& canvas, VulkanRenderer& renderer, bool enableEnviroment) : m_canvas(canvas),  m_renderer(renderer) {
         m_scene = Scene::create();
-        initializeSun();
-        m_scene->add(m_sun);
 
-        initializeFloor();
-        m_scene->add(m_floor);
+        if (enableEnviroment) {
+            initializeFloor();
+            m_scene->add(m_floor);
 
-        //initializeOcean();
-        //m_scene->add(m_ocean);
 
-        RGBELoader rgbe;
-        auto env = rgbe.load("/home/amadeus/Desktop/path_planner/assets/autumn_field_puresky_2k.hdr");
+            initializeSun();
+            m_scene->add(m_sun);
 
-        m_scene->background=env;
+            //initializeOcean();
+            //m_scene->add(m_ocean);
+
+            RGBELoader rgbe;
+            auto env = rgbe.load("/home/amadeus/Desktop/path_planner/assets/autumn_field_puresky_2k.hdr");
+
+            m_scene->background=env;
+        }
+        else {
+            m_scene->background=Color::black;
+        }
     };
 
     auto getScene() {
@@ -37,6 +44,9 @@ public:
         m_scene->add(obj);
     }
     auto addToScene(std::shared_ptr<Group>& obj) {
+        m_scene->add(obj);
+    }
+    auto addToScene(std::shared_ptr<Mesh>&obj) {
         m_scene->add(obj);
     }
 
@@ -65,7 +75,7 @@ private:
         MeshStandardMaterial::create(MeshStandardMaterial::Params{}
             .color(Color(0.02f, 0.02f, 0.02f)).roughness(1.0f)));
         m_floor->rotation.x = -math::PI / 2.f;
-        m_floor->position.y = -10.f;
+        m_floor->position.y = -30.f;
     }
 
     void initializeOcean() {
