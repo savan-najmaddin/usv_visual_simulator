@@ -16,6 +16,10 @@ public:
         return m_usv;
     }
 
+    std::pair<Vector3,Vector3> getLensPosition()const {
+        return {m_usv->getObjectByName("leftlense")->position, m_usv->getObjectByName("rightlense")->position};
+    }
+
     //todo make code for stereo camera and object detection.
 
 
@@ -35,12 +39,12 @@ private:
         auto lens1 = CylinderGeometry::create(0.3, 0.2, 0.2);
         auto lenmat1 = MeshBasicMaterial::create();
         auto lenMesh1 = Mesh::create(lens1);
-        lenMesh1->name = "cameralens1";
+        lenMesh1->name = "leftlens";
 
         auto lens2 = CylinderGeometry::create(0.3, 0.2, 0.2);
         auto lenmat2 = MeshBasicMaterial::create();
         auto lenMesh2 = Mesh::create(lens2);
-        lenMesh2->name = "cameralens2";
+        lenMesh2->name = "rightlens";
 
         auto square = BoxGeometry::create(5, 1, 0.5);
         auto mat = MeshBasicMaterial::create();
@@ -113,6 +117,8 @@ private:
         m_camera = camera;
         m_usv->add(camera);
         m_usv->rotateX(-std::numbers::pi/2);
+
+        m_usv->scale*=0.1;
     }
 };
 

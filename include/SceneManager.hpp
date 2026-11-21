@@ -40,13 +40,7 @@ public:
         return m_scene;
     }
 
-    void addToScene(std::shared_ptr<Object3D>& obj) {
-        m_scene->add(obj);
-    }
-    auto addToScene(std::shared_ptr<Group>& obj) {
-        m_scene->add(obj);
-    }
-    auto addToScene(std::shared_ptr<Mesh>&obj) {
+    void addToScene(const std::shared_ptr<Object3D>& obj) {
         m_scene->add(obj);
     }
 
