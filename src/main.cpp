@@ -99,7 +99,7 @@ int main() {
     Canvas canvas("DEMO", {{"vsync", false}, {"size", WindowSize{width, height}}});
     VulkanRenderer renderer{canvas};
 
-    VulkanRenderer stereoRenderer{canvas};
+
 
     PerspectiveCamera camera(50.f, canvas.aspect(), 0.1f, 2000.f);
     camera.position.set(40.f, 18.f, 60.f);
@@ -123,33 +123,29 @@ int main() {
 
     StereoCamera stereo(usv.getLensPosition(), canvas.aspect(), canvas);
 
-    bool pov=false;
+    bool pov = true;
 
     ImguiFunctionalContext ui(canvas, renderer, [&] {
         ImGui::SliderFloat("x", &idealPos.x, 0, 100);
         ImGui::SliderFloat("y", &idealPos.y, 0, 100);
         ImGui::SliderFloat("z", &idealPos.z, 0, 100);
+        ImGui::Checkbox("pov", &pov);
 
-        ImGui::Checkbox("change pov", &pov);
+
     });
 
 
     canvas.animate([&] {
-
         if (pov) {
             renderer.autoClear=true;
-        stereo.update(*sceneManager.getScene());
-
-        renderer.render(*sceneManager.getScene(), camera);
-
-        renderer.autoClear=false;
-        renderer.clearDepth();
-        renderer.render(*hudScene.getScene(), *hud.getCamera());
-        }
+            renderer.render(*sceneManager.getScene(), camera);
+            renderer.autoClear=false;
+            renderer.clearDepth();
+            renderer.render(*hudScene.getScene(), *hud.getCamera());
+            }
         else {
             stereo.update(*sceneManager.getScene());
         }
-
 
         ui.render();
         controls.update();
