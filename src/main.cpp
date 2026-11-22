@@ -9,19 +9,21 @@
 using namespace threepp;
 //todo make paths relative to the project
 
+
 class StereoCamera {
 public:
     StereoCamera(std::pair<Vector3, Vector3> lensPosition, const float aspectRatio, Canvas& canvas) {
+        m_stereoCamera = Group::create();
 
-        initializeRenderer(canvas);
-
-        m_leftCamera=PerspectiveCamera::create(60,aspectRatio,0.1,1000);
+        m_leftCamera=PerspectiveCamera::create(60,aspectRatio/2,0.1,1000);
         m_leftCamera->name="leftcamera";
         m_leftCamera->position=lensPosition.first; //todo verify first is left
+        m_leftCamera->rotateY(-std::numbers::pi/2);
 
-        m_rightCamera=PerspectiveCamera::create(60,aspectRatio,0.1,1000);
+        m_rightCamera=PerspectiveCamera::create(60,aspectRatio/2,0.1,1000);
         m_rightCamera->position=lensPosition.second;
         m_rightCamera->name="rightcamera";
+        m_rightCamera->rotateY(-std::numbers::pi/2);
 
         m_stereoCamera->add(m_leftCamera);
         m_stereoCamera->add(m_rightCamera);
@@ -29,26 +31,27 @@ public:
         m_screenSize=canvas.size();
     }
 
-    void update(Scene& scene) {
-        m_renderer->setScissor(0,0,m_screenSize.width()/2, m_screenSize.height());
-        m_renderer->render(scene, *m_leftCamera);
-
-        m_renderer->setScissor(m_screenSize.width()/2, 0, m_screenSize.width(), m_screenSize.height());
-        m_renderer->render(scene, *m_rightCamera);
-    }
-
-    void initializeRenderer(Canvas& canvas) {
-        m_renderer=std::make_unique<VulkanRenderer>(canvas);
-        m_renderer->setScissorTest(true);
-        m_renderer->setClearAlpha(0);
-        m_renderer->setClearColor(0);
-
+    auto getCamera()const {
+        return m_stereoCamera;
     }
 
 
 
-    void renderStereo(VulkanRenderer& renderer) {
 
+    void renderStereo(VulkanRenderer& renderer, Scene& scene, WindowSize size) {
+        renderer.setScissorTest(true);
+        int width=size.width();
+        int height= size.height();
+
+        renderer.setViewport(0,0, width/2, height);
+        renderer.setScissor(0,0,width/2, height);
+        renderer.render(scene, *m_leftCamera);
+
+        renderer.setViewport(width/2, 0, width/2, height);
+        renderer.setScissor(width/2, 0, width/2, height);
+        renderer.render(scene,*m_rightCamera);
+
+        renderer.setScissorTest(false);
     }
 
 
@@ -58,9 +61,6 @@ private:
     std::shared_ptr<Group> m_stereoCamera;
     std::shared_ptr<PerspectiveCamera> m_leftCamera;
     std::shared_ptr<PerspectiveCamera> m_rightCamera;
-
-    std::unique_ptr<VulkanRenderer> m_renderer;
-
     WindowSize m_screenSize;
 };
 
@@ -121,9 +121,14 @@ int main() {
     sceneManager.addToScene(object.getObject());
     Vector3 idealPos{0, 0, 0};
 
-    StereoCamera stereo(usv.getLensPosition(), canvas.aspect(), canvas);
 
-    bool pov = true;
+    std::cout<<usv.getLensPosition().first<<std::endl;
+
+
+    StereoCamera stereo(usv.getLensPosition(), canvas.aspect(), canvas);
+    sceneManager.addToScene(stereo.getCamera());
+
+    bool pov = false;
 
     ImguiFunctionalContext ui(canvas, renderer, [&] {
         ImGui::SliderFloat("x", &idealPos.x, 0, 100);
@@ -136,17 +141,16 @@ int main() {
 
 
     canvas.animate([&] {
+        renderer.autoClear=true;
         if (pov) {
-            renderer.autoClear=true;
-            renderer.render(*sceneManager.getScene(), camera);
-            renderer.autoClear=false;
-            renderer.clearDepth();
-            renderer.render(*hudScene.getScene(), *hud.getCamera());
+            stereo.renderStereo(renderer, *sceneManager.getScene(), canvas.size());
             }
         else {
-            stereo.update(*sceneManager.getScene());
+            renderer.render(*sceneManager.getScene(), camera);
         }
-
+        renderer.autoClear=false;
+        renderer.clearDepth();
+        renderer.render(*hudScene.getScene(), *hud.getCamera());
         ui.render();
         controls.update();
     });

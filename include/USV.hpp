@@ -17,7 +17,13 @@ public:
     }
 
     std::pair<Vector3,Vector3> getLensPosition()const {
-        return {m_usv->getObjectByName("leftlense")->position, m_usv->getObjectByName("rightlense")->position};
+        Vector3 leftCameraPosition;
+        Vector3 rightCameraPosition;
+
+        m_usv->getObjectByName("leftlense")->getWorldPosition(leftCameraPosition);
+        m_usv->getObjectByName("rightlense")->getWorldPosition(rightCameraPosition);
+        return { rightCameraPosition,leftCameraPosition};
+
     }
 
     //todo make code for stereo camera and object detection.
@@ -39,12 +45,12 @@ private:
         auto lens1 = CylinderGeometry::create(0.3, 0.2, 0.2);
         auto lenmat1 = MeshBasicMaterial::create();
         auto lenMesh1 = Mesh::create(lens1);
-        lenMesh1->name = "leftlens";
+        lenMesh1->name = "leftlense";
 
         auto lens2 = CylinderGeometry::create(0.3, 0.2, 0.2);
         auto lenmat2 = MeshBasicMaterial::create();
         auto lenMesh2 = Mesh::create(lens2);
-        lenMesh2->name = "rightlens";
+        lenMesh2->name = "rightlense";
 
         auto square = BoxGeometry::create(5, 1, 0.5);
         auto mat = MeshBasicMaterial::create();
@@ -108,8 +114,6 @@ private:
         m_usv->add(body);
         auto box = initBox(body);
         auto thruster = initThrusters(box.getSize(), box.getCenter());
-        std::cout<<box.getCenter()<<std::endl;
-        std::cout << box.getSize()<<std::endl;
         for (auto elem: thruster) {
             m_usv->add(elem);
         }
