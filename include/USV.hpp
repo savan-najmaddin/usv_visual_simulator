@@ -23,8 +23,19 @@ public:
         m_usv->getObjectByName("leftlense")->getWorldPosition(leftCameraPosition);
         m_usv->getObjectByName("rightlense")->getWorldPosition(rightCameraPosition);
         return { rightCameraPosition,leftCameraPosition};
-
     }
+    auto getCameraCenter() {
+        Vector3 cameraCenter;
+        m_usv->getObjectByName("centerlense")->getWorldPosition(cameraCenter);
+
+        return cameraCenter;
+    }
+
+    float getLenseDistance() const{
+        return m_lenseDistance;
+    }
+
+
 
     //todo make code for stereo camera and object detection.
 
@@ -34,6 +45,7 @@ private:
     std::shared_ptr<Group> m_selene;
     std::shared_ptr<Group> m_camera;
     AssimpLoader m_loader;
+    float m_lenseDistance;
 
     auto initBody() {
         auto userBoat = m_loader.load("/home/amadeus/Desktop/path_planner/assets/simp_usv.obj");
@@ -42,6 +54,7 @@ private:
     }
 
     std::shared_ptr<Group> initCamera(Vector3 center, Vector3 size) {
+        float lenseDistance=2.0f;
         auto lens1 = CylinderGeometry::create(0.3, 0.2, 0.2);
         auto lenmat1 = MeshBasicMaterial::create();
         auto lenMesh1 = Mesh::create(lens1);
@@ -60,20 +73,38 @@ private:
         camera->add(squareMesh);
 
         camera->add(lenMesh1);
-        lenMesh1->position.x += 2;
+        lenMesh1->position.x -= lenseDistance;
         lenMesh1->position.y += 0.5;
 
         camera->add(lenMesh2);
-        lenMesh2->position.x -= 2;
+        lenMesh2->position.x += lenseDistance;
         lenMesh2->position.y += 0.5;
 
+
+        auto cameraCenterMat = MeshBasicMaterial::create();
+        cameraCenterMat->color=Color::green;
+        auto cameraCenter=Mesh::create((CylinderGeometry::create(0.2,0.2, 0.3)), cameraCenterMat);
+        cameraCenter->position.y+=0.5;
+        cameraCenter->name="centerlense";
+        camera->add(cameraCenter);
         camera->position = center;
         camera->position.x+=size.x/2;
-        //camera->rotateY(-std::numbers::pi/2);
-        //camera->rotateX(-std::numbers::pi/2);
         camera->rotateZ(-std::numbers::pi/2);
+
         return camera;
     }
+
+    void findLenseDistance(Object3D& leftLense, Object3D& rightLense) {
+        Vector3 vec1;
+        Vector3 vec2;
+
+        leftLense.getWorldPosition(vec1);
+        rightLense.getWorldPosition(vec2);
+
+        m_lenseDistance= vec2.distanceTo(vec1);
+
+    }
+
 
     auto initBox(std::shared_ptr<Group> &boat) {
         Box3 box;
@@ -123,6 +154,7 @@ private:
         m_usv->rotateX(-std::numbers::pi/2);
 
         m_usv->scale*=0.1;
+        findLenseDistance(*m_usv->getObjectByName("leftlense"), *m_usv->getObjectByName("rightlense"));
     }
 };
 
